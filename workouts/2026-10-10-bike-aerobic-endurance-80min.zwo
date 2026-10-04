@@ -1,0 +1,10 @@
+<workout_file>
+  <author>Robotina</author>
+  <name>Bike - Aerobic Endurance 80min</name>
+  <description>Friel Base 1 cornerstone: 80 min steady aerobic. Stay in zone, finish feeling like you could keep going.</description>
+  <sportType>bike</sportType>
+  <tags><tag name="70.3"/></tags>
+  <workout>
+    <SteadyState Duration="4800" Power="0.66" Cadence="90"/>
+  </workout>
+</workout_file>

@@ -1,0 +1,44 @@
+diff --git a/src/auth.ts b/src/auth.ts
+index e718233..7a4f294 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -12,6 +12,29 @@ const TOKEN_PATH = path.join(
+   "auth-token.json",
+ );
+ 
++// Local patch: route the login browser through the environment's egress proxy,
++// which Playwright does not pick up automatically.
++function proxyFromEnv():
++  | { server: string; username?: string; password?: string }
++  | undefined {
++  const raw =
++    process.env.TP_PROXY_URL ||
++    process.env.HTTPS_PROXY ||
++    process.env.https_proxy;
++  if (!raw) return undefined;
++  try {
++    const u = new URL(raw);
++    const proxy: { server: string; username?: string; password?: string } = {
++      server: `${u.protocol}//${u.host}`,
++    };
++    if (u.username) proxy.username = decodeURIComponent(u.username);
++    if (u.password) proxy.password = decodeURIComponent(u.password);
++    return proxy;
++  } catch {
++    return undefined;
++  }
++}
++
+ export class AuthManager {
+   private credentials: AuthCredentials;
+   private token: AuthToken | null = null;
+@@ -54,7 +77,8 @@ export class AuthManager {
+ 
+     const { chromium } = await import("playwright");
+     this.browser = await chromium.launch({ headless: this.headless });
+-    this.context = await this.browser.newContext();
++    const proxy = proxyFromEnv();
++    this.context = await this.browser.newContext(proxy ? { proxy } : {});
+     const page = await this.context.newPage();
+ 
+     let capturedToken: string | null = null;
